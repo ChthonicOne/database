@@ -42,6 +42,8 @@ public class Event
 	@JoinColumn(name = "cid")
 	private Set<Comment> comment = new HashSet<>();
 	
+	public Event() {}
+	
 	public Event(String name, String desc, String location, long time)
 	{
 		super();

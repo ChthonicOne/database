@@ -12,6 +12,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,6 +22,7 @@ import cop4710.termproject.rest.helpers.RSO;
 import cop4710.termproject.rest.manager.QueryManager;
 
 @RestController
+@CrossOrigin(origins = "http://localhost:8080")
 @RequestMapping("/termproject")
 public class TermRestController
 {
@@ -352,20 +354,24 @@ public class TermRestController
 	}
 	
 	@RequestMapping(value = "/superlogin", method = RequestMethod.GET)
-	public ResponseEntity<?> superLogin(@Param("user") String username, @Param("password") String password) throws URISyntaxException
+	public ResponseEntity<?> superLogin(@Param("username") String username, @Param("password") String password) throws URISyntaxException
 	{
-		String uribase = "http://localhost:8080/termproject/userlogin";
+		log.info("SuperLogin request User: " + username + " Password: " + password);
+		String uribase = "http://localhost:8080/termproject/superlogin";
 		URI location = new URI(uribase);
 		HttpHeaders responseHeaders = new HttpHeaders();
 		responseHeaders.setLocation(location);
+		ResponseEntity<String> response;
 		if (query.validateSuperAdmin(username, password))
 		{
 			responseHeaders.set("Success", "200"); // Success
+			response = new ResponseEntity<String>("Logged in", responseHeaders, HttpStatus.CREATED);
 		} else
 		{
 			responseHeaders.set("Not Authorized", "401"); // Not Authorized
+			response = new ResponseEntity<String>("Not Authorized", responseHeaders, HttpStatus.CREATED);
 		}
-		return new ResponseEntity<String>("User Added", responseHeaders, HttpStatus.CREATED);
+		return response;
 	}
 	
 	@RequestMapping(value = "/createpublic", method = RequestMethod.GET)

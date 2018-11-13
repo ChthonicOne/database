@@ -74,9 +74,11 @@ public class SuperAdminService
 		Optional<SuperAdmin> result = repository.findSAByName(username);
 		if (result.isPresent() && result.get().getPassword().equals(password))
 		{
+			log.info("Valid Username: " + username + " Password: " + password);
 			return true;
 		} else
 		{
+			log.info("Invalid Username: " + username + " Password: " + password);
 			return false;
 		}
 	}

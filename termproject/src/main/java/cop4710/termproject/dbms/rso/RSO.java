@@ -51,6 +51,8 @@ public class RSO
 	@Transient
 	private Set<User> users = new HashSet<>();
 	
+	public RSO() {}
+	
 	public RSO(String name, String passwd, User user/*, String university*/)
 	{
 		super();

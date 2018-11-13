@@ -33,6 +33,8 @@ public class SuperAdmin
 	@JoinColumn(name = "eid")
 	private Set<PublicEvent> event = new HashSet<>();
 	
+	public SuperAdmin() {}
+	
 	public SuperAdmin(String name, String password)
 	{
 		super();

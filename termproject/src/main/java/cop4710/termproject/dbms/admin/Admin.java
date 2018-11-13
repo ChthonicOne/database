@@ -42,6 +42,7 @@ public class Admin
 	@JoinColumn(name = "rid")
 	private RSO rso;
 	
+	public Admin() {}
 
 	public Admin(String name, String passwd, RSO rso)
 	{

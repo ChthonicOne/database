@@ -24,6 +24,8 @@ public class PrivateEvent extends Event
 	private boolean approved = false;
 	//private String university;
 	
+	public PrivateEvent() {}
+	
 	public PrivateEvent(String name, String desc, String location, long time, Admin admin/*, String university*/)
 	{
 		super(name, desc, location, time);

@@ -35,6 +35,8 @@ public class Comment
     @JoinColumn(name = "eid", nullable = false)
     private Event event;
 	
+	public Comment() {}
+	
 	public Comment(String text, double rating, long timestamp, User user, Event event)
 	{
 		super();

@@ -21,6 +21,8 @@ public class PublicEvent extends Event
     @JoinColumn(name = "said", nullable = false)
 	private SuperAdmin admin;
 	
+	public PublicEvent(){}
+	
 	public PublicEvent(String name, String desc, String location, long time, SuperAdmin admin)
 	{
 		super(name, desc, location, time);

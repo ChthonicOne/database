@@ -21,6 +21,8 @@ public class RSOEvent extends Event
     @JoinColumn(name = "rid", nullable = false)
 	private RSO rso;
 	
+	public RSOEvent() {}
+	
 	public RSOEvent(String name, String desc, String location, long time, RSO rso)
 	{
 		super(name, desc, location, time);
