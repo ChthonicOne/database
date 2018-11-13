@@ -53,6 +53,8 @@ public class User
 	                                            referencedColumnName = "rid"))
 	private Set<RSO> rsos = new HashSet<>();
 	
+	public User() {}
+	
 	public User(String name, String passwd/*, String university*/)
 	{
 		super();
