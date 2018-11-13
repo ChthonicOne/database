@@ -22,7 +22,7 @@ import cop4710.termproject.rest.helpers.RSO;
 import cop4710.termproject.rest.manager.QueryManager;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:8080")
+@CrossOrigin(origins = "http://localhost:3000")
 @RequestMapping("/termproject")
 public class TermRestController
 {
