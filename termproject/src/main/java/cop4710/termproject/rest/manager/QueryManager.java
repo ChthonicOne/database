@@ -70,16 +70,20 @@ public class QueryManager
 		List<PrivateEvent> pevents = privateEvent.findAll();
 		List<RSOEvent> revents = rsoEvent.findAll();
 		
-		for (PrivateEvent event : pevents)
+		if (!pevents.isEmpty())
 		{
-			results.add(new Event(event.getId(), event.getName(), event.getDesc(), event.getLocation(), "private", event.getTime()));
+			for (PrivateEvent event : pevents)
+			{
+				results.add(new Event(event.getId(), event.getName(), event.getDesc(), event.getLocation(), "private", event.getTime()));
+			}
 		}
-		
-		for (RSOEvent event : revents)
+		if (!revents.isEmpty())
 		{
-			results.add(new Event(event.getId(), event.getName(), event.getDesc(), event.getLocation(), event.getRso().getName(), event.getTime()));
+			for (RSOEvent event : revents)
+			{
+				results.add(new Event(event.getId(), event.getName(), event.getDesc(), event.getLocation(), event.getRso().getName(), event.getTime()));
+			}
 		}
-		
 		return results;
 	}
 
@@ -245,7 +249,7 @@ public class QueryManager
 		return true;
 	}
 
-	public boolean createAdmin(String username, Long id, String adminpassword) 
+	public int createAdmin(String username, Long id, String adminpassword) 
 	{
 		Optional<cop4710.termproject.dbms.rso.RSO> result = rso.find(id);
 		if (result.isPresent())
@@ -253,18 +257,25 @@ public class QueryManager
 			if (user.countUsersInRSO(result.get().getName()) > 4)
 			{
 				Admin a = new Admin(username, adminpassword, result.get());
-				admin.insert(a);
 				cop4710.termproject.dbms.rso.RSO update = result.get();
-				update.setActive(true);
-				rso.insert(update);
-				return true;
+				if (!update.isActive())
+				{	
+					admin.insert(a);
+					update.setActive(true);
+					update.setAdmin(a);
+					rso.insert(update);
+				return 0;
+				} else
+				{
+					return 1;
+				}
 			} else
 			{
-				return false;
+				return 2;
 			}
 		}else
 		{
-			return false;
+			return 3;
 		}
 	}
 

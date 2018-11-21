@@ -56,10 +56,10 @@ public class PublicEventService
 	{
 		if (repository.countEventsAtLocAndTime(loc, time) > 0)
 		{
-			return false;
+			return true;
 		} else
 		{
-			return true;
+			return false;
 		}
 	}
 }

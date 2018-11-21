@@ -8,7 +8,7 @@ import org.springframework.data.repository.query.Param;
 
 public interface RSOEventRepository extends JpaRepository<RSOEvent, Long> 
 {
-	@Query("Select r from rsoevent r Join rso s")
+	@Query("Select r from rsoevent r Join r.rso")
 	public List<RSOEvent> findAll();
 	@Query("Select Count (p.id) From rsoevent p Where p.location = :location And p.time = :time")
 	public Long countEventsAtLocAndTime(@Param("location") String location, @Param("time") Long time);

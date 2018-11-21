@@ -1,7 +1,10 @@
-package cop4710.termproject.dbms.superadmin;
+package cop4710.termproject.initial;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import cop4710.termproject.dbms.superadmin.SuperAdmin;
+import cop4710.termproject.dbms.superadmin.SuperAdminRepository;
 
 @Component
 public class SALoader 

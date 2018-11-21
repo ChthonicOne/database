@@ -1,15 +1,13 @@
 package cop4710.termproject.rest;
 
-import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.query.Param;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -33,276 +31,303 @@ public class TermRestController
 	private static final Logger log = LoggerFactory.getLogger(TermRestController.class);
 	
 	@RequestMapping(value = "/publiceventlist", method = RequestMethod.GET)
-	public List<Event> publicEventList()
+	public ResponseEntity<?> publicEventList()
 	{
-		return query.getPublicList();
+		log.info("Public Query Request");
+		return ResponseEntity.ok(query.getPublicList());
 	}
 	
 	@RequestMapping(value = "/privateeventlist", method = RequestMethod.GET)
-	public List<Event> privateEventList(@Param("user") String username, @Param("password") String password)
+	public ResponseEntity<?> privateEventList(@Param("username") String username, @Param("password") String password)
 	{
 		if (query.validateUser(username, password))
 		{
-			return query.getList();
+			log.info(username + " viewed their private event list");
+			return ResponseEntity.ok(query.getList());
 		} else
 		{
-			return Collections.emptyList();
+			log.info("Unauthorized access to private event list by username:" + username + " with password: " + password);
+			List<Event> response = new LinkedList<>();
+			response.add(new Event(-1L,
+								   "Forbidden",
+								   "You are not authorized to view this page", 
+								   "http://localhost:8080/termproject/privateeventlist", 
+								   "error", 
+								   0L));
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
 		}
 	}
 	
 	@RequestMapping(value = "/userregistration", method = RequestMethod.GET)
-	public ResponseEntity<?> userRegistration(@Param("user") String username, @Param("password") String password) throws URISyntaxException
+	public ResponseEntity<?> userRegistration(@Param("username") String username, @Param("password") String password) throws URISyntaxException
 	{
-		String uribase = "http://localhost:8080/termproject/userregistration";
-		URI location = new URI(uribase);
-		HttpHeaders responseHeaders = new HttpHeaders();
-		responseHeaders.setLocation(location);
 		if (query.userExists(username))
 		{
-			responseHeaders.set("User already exists", "409"); //Conflict
+			log.info("User " + username + " already exists");
+			return ResponseEntity.status(HttpStatus.CONFLICT).body("User already Exists");
 		}else
 		{
+			log.info("User " + username + " added.");
 			query.createUser(username, password);
-			responseHeaders.set("Success", "200"); // Correctly inserted
+			return ResponseEntity.ok("User Registered");
 		}
-		return new ResponseEntity<String>("User Added", responseHeaders, HttpStatus.CREATED);
 	}
 	
 	@RequestMapping(value = "/userlogin", method = RequestMethod.GET)
-	public ResponseEntity<?> userLogin(@Param("user") String username, @Param("password") String password) throws URISyntaxException
+	public ResponseEntity<?> userLogin(@Param("username") String username, @Param("password") String password) throws URISyntaxException
 	{
-		String uribase = "http://localhost:8080/termproject/userlogin";
-		URI location = new URI(uribase);
-		HttpHeaders responseHeaders = new HttpHeaders();
-		responseHeaders.setLocation(location);
 		if (query.validateUser(username, password))
 		{
-			responseHeaders.set("Validated", "200"); // Validated
+			log.info(username + " logged in.");
+			return ResponseEntity.ok("User Validated");
 		} else
 		{
-			responseHeaders.set("Unauthorized Access", "401"); // unauthorized
+			log.info("Invalid login to " + username + " with password " + password);
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Unauthorized Access");
 		}
-		return new ResponseEntity<String>("User Logged in.", responseHeaders, HttpStatus.CREATED);
 	}
 	
 	@RequestMapping(value = "/userrso", method = RequestMethod.GET)
-	public List<RSO> userRSO(@Param("user") String username, @Param("password") String password)
+	public ResponseEntity<?> userRSO(@Param("username") String username, @Param("password") String password)
 	{
-		return query.getUsersRSOs(username, password);
+		if (query.validateUser(username, password))
+		{
+			log.info(username + " aquires their rso list");
+			return ResponseEntity.ok(query.getUsersRSOs(username, password));
+		}else
+		{
+			log.info("Unauthorized access to " + username + "'s rso list with password " + password);
+			List<RSO> response = new LinkedList<>();
+			response.add(new RSO(-1L,
+								 "Forbidden",
+								 "You are not authorized to view this page", 
+								 false));
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+		}
 	}
 	
 	@RequestMapping(value = "/userupdaterso", method = RequestMethod.GET)
-	public ResponseEntity<?> userUpdateRSO(@Param("user") String username, @Param("password") String password, @Param("rso") Long id) throws URISyntaxException
+	public ResponseEntity<?> userUpdateRSO(@Param("username") String username, @Param("password") String password, @Param("rso") Long id) throws URISyntaxException
 	{
-		String uribase = "http://localhost:8080/termproject/userlogin";
-		URI location = new URI(uribase);
-		HttpHeaders responseHeaders = new HttpHeaders();
-		responseHeaders.setLocation(location);
 		if (query.validateUser(username, password))
 		{
 			if (query.updateUserRso(username, id))
 			{
-				responseHeaders.set("Success", "200"); // 404 not found
+				log.info(username + " added  RSO #" + id + " to their RSOs");
+				return ResponseEntity.ok("Updated RSO List with RSO #" + id);
 			} else
 			{
-				responseHeaders.set("RSO not found", "404"); // 404 not found
+				log.info(username + " attempted to add RSO #" + id + " to their RSOs but it was not found");
+				return ResponseEntity.status(HttpStatus.NOT_FOUND).body("RSO #" + id + " not found.");
 			}
 		}else
 		{
-			responseHeaders.set("Not Authorized", "409"); // not authorized
+			log.info("Unauthorized access to " + username + "'s RSO list with password " + password);
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Unauthorized Access");
 		}
-		return new ResponseEntity<String>("User Added", responseHeaders, HttpStatus.CREATED);
 	}
 	
 	@RequestMapping(value = "/listrso", method = RequestMethod.GET)
-	public List<RSO> listRSO(@Param("user") String username, @Param("password") String password)
+	public ResponseEntity<?> listRSO(@Param("username") String username, @Param("password") String password)
 	{
-		return query.getRSOList(username, password);
+		if (query.validateUser(username, password))
+		{
+			log.info(username + "Retrieved list of RSOs");
+			return ResponseEntity.ok(query.getRSOList(username, password));
+		}else
+		{
+			log.info("Unauthorized access to RSO list by username " + username + " with password " + password);
+			List<RSO> response = new LinkedList<>();
+			response.add(new RSO(-1L,
+								 "Forbidden",
+								 "You are not authorized to view this page", 
+								 false));
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+		}
 	}
 	
 	@RequestMapping(value = "/createrso", method = RequestMethod.GET)
-	public ResponseEntity<?> createRSO(@Param("user") String username, 
+	public ResponseEntity<?> createRSO(@Param("username") String username, 
 									   @Param("password") String password, 
 									   @Param("name") String name,
 									   @Param("rsopassword") String rsopassword) throws URISyntaxException
 	{
-		String uribase = "http://localhost:8080/termproject/userregistration";
-		URI location = new URI(uribase);
-		HttpHeaders responseHeaders = new HttpHeaders();
-		responseHeaders.setLocation(location);
 		if (query.validateUser(username, password))
 		{
 			if (query.createNewRSO(username, name, rsopassword))
 			{
-				responseHeaders.set("Success", "200"); //Success
+				log.info(username + " created a new RSO named " + name + " with password " + rsopassword);
+				return ResponseEntity.ok("RSO Created.");
 			} else
 			{
-				responseHeaders.set("RSO already exists", "409"); //Conflict
+				log.info(username + " attempted to create a new RSO but it already existed");
+				return ResponseEntity.status(HttpStatus.CONFLICT).body("RSO already exists.");
 			}
 		} else
 		{
-			responseHeaders.set("Not Authorized", "401"); // Not Authorized
+			log.info("Unauthorized access to create a new RSO by username " + username + " with password " + password);
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Unauthorized Access");
 		}
-		return new ResponseEntity<String>("User Added", responseHeaders, HttpStatus.CREATED);
 	}
 	
 	@RequestMapping(value = "/activaterso", method = RequestMethod.GET)
-	public ResponseEntity<?> activateRSO(@Param("user") String username, 
+	public ResponseEntity<?> activateRSO(@Param("username") String username, 
 									     @Param("password") String password, 
 									     @Param("rso") Long id,
 									     @Param("rsopassword") String rsopassword) throws URISyntaxException
 	{
-		String uribase = "http://localhost:8080/termproject/userlogin";
-		URI location = new URI(uribase);
-		HttpHeaders responseHeaders = new HttpHeaders();
-		responseHeaders.setLocation(location);
 		if(query.validateUser(username, password) && query.RSOActivate(id, rsopassword))
 		{
-			responseHeaders.set("Success", "200"); // Success
+			log.info(username + " activated RSO #" + id);
+			return ResponseEntity.ok("RSO Created");
 		} else
 		{
 			if (query.validateUser(username, password))
 			{
-				responseHeaders.set("Not Authorized", "401"); // Not Authorized
+				log.info("Unauthorized access to activate RSO #" + id + " by username " + username + " with password " + password);
+				return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Unauthorized Access");
 			} else
 			{
-				responseHeaders.set("Not enough members", "401"); // Not enough members
+				log.info(username + " tried to activate RSO #" + id + " but did not have enough members");
+				return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Not Enough Members");
 			}
 		}
-		
-		return new ResponseEntity<String>("User Added", responseHeaders, HttpStatus.CREATED);
 	}
 	
 	@RequestMapping(value = "/deleteuser", method = RequestMethod.GET)
-	public ResponseEntity<?> deleteUser(@Param("user") String username, @Param("password") String password) throws URISyntaxException
+	public ResponseEntity<?> deleteUser(@Param("username") String username, @Param("password") String password) throws URISyntaxException
 	{
-		String uribase = "http://localhost:8080/termproject/userlogin";
-		URI location = new URI(uribase);
-		HttpHeaders responseHeaders = new HttpHeaders();
-		responseHeaders.setLocation(location);
 		if (query.validateUser(username, password))
 		{
 			query.deleteUser(username, password);
-			responseHeaders.set("Success", "200"); // 404 not found/401 unauthorized
+			log.info(username + " removed from database");
+			return ResponseEntity.ok("User Deleted.");
 		} else
 		{
-			responseHeaders.set("Not Authorized", "401"); //Not Authorized
+			log.info("Unauthorized access to delete username " + username + " with password " + password);
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Unauthorized Access");
 		}
-		
-		return new ResponseEntity<String>("User Added", responseHeaders, HttpStatus.CREATED);
 	}
 	
 	@RequestMapping(value = "/getcomments", method = RequestMethod.GET)
-	public List<EventComment> getComments(@Param("user") String username, @Param("password") String password, @Param("event") Long id)
+	public ResponseEntity<?> getComments(@Param("username") String username, @Param("password") String password, @Param("event") Long id)
 	{
 		if (query.validateUser(username, password))
 		{
-			return query.getComments(id);
+			log.info(username + " got comments for event #" + id);
+			return ResponseEntity.ok(query.getComments(id));
 		} else
 		{
-			return Collections.emptyList();
+			log.info("Unauthorized access to delete username " + username + " with password " + password);
+			List<EventComment> response = new LinkedList<>();
+			response.add(new EventComment(-1L,
+								 		  "Forbidden",
+								 		  "You are not authorized to view this page",
+								 		  0.0,
+								 		  0L));
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
 		}
 	}
 	
 	@RequestMapping(value = "/comment", method = RequestMethod.GET)
-	public ResponseEntity<?> userComment(@Param("user") String username, 
+	public ResponseEntity<?> userComment(@Param("username") String username, 
 										 @Param("password") String password, 
 										 @Param("event") Long id,
 										 @Param("text") String text,
 										 @Param("rating") Double rating) throws URISyntaxException
 	{
-		String uribase = "http://localhost:8080/termproject/userlogin";
-		URI location = new URI(uribase);
-		HttpHeaders responseHeaders = new HttpHeaders();
-		responseHeaders.setLocation(location);
 		if (query.validateUser(username, password))
 		{
 			if (query.makeComment(username, id, text, rating))
 			{
-				responseHeaders.set("Success", "200"); // Success
+				log.info(username + " added comment to event #" + id);
+				return ResponseEntity.ok("Comment added");
 			} else
 			{
-				responseHeaders.set("Event not Found", "404"); // Event not Found
+				log.info(username + " tried to add comment to event #" + id + " but event was not found");
+				return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Event not Found.");
 			}
 		} else
 		{
-			responseHeaders.set("Not Authorized", "401"); // Not Authorized
+			log.info("Unauthorized access to add comment to event #" + id + " with username " + username + " with password " + password);
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Unauthorized Access");
 		}
-		return new ResponseEntity<String>("User Added", responseHeaders, HttpStatus.CREATED);
 	}
 	
 	@RequestMapping(value = "/changecomment", method = RequestMethod.GET)
-	public ResponseEntity<?> changeComment(@Param("user") String username, 
+	public ResponseEntity<?> changeComment(@Param("username") String username, 
 										   @Param("password") String password, 
 										   @Param("comment") Long id,
 										   @Param("text") String text,
 										   @Param("rating") Double rating) throws URISyntaxException
 	{
-		String uribase = "http://localhost:8080/termproject/userlogin";
-		URI location = new URI(uribase);
-		HttpHeaders responseHeaders = new HttpHeaders();
-		responseHeaders.setLocation(location);
 		if (query.validateUser(username, password))
 		{
 			if (query.changeComment(username, id, text, rating))
 			{
-				responseHeaders.set("Success", "200"); // Success
+				log.info(username + " changed their comment #" + id);
+				return ResponseEntity.ok("Comment Changed");
 			} else
 			{
-				responseHeaders.set("Comment not Found", "404"); // Comment not Found
+				log.info(username + " tried to change comment #" + id + " but the comment was not found");
+				return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Comment not Found.");
 			}
 		} else
 		{
-			responseHeaders.set("Not Authorized", "401"); // Not Authorized
+			log.info("Unauthorized access to change comment #" + id + " with username " + username + " with password " + password);
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Unauthorized Access");
 		}
-		return new ResponseEntity<String>("User Added", responseHeaders, HttpStatus.CREATED);
 	}
 	
 	@RequestMapping(value = "/createadmin", method = RequestMethod.GET)
-	public ResponseEntity<?> createAdmin(@Param("user") String username, 
+	public ResponseEntity<?> createAdmin(@Param("username") String username, 
 			   							 @Param("password") String password, 
 			   							 @Param("rso") Long id,
 			   							 @Param("adminpassword") String adminpassword) throws URISyntaxException
 	{
-		String uribase = "http://localhost:8080/termproject/userlogin";
-		URI location = new URI(uribase);
-		HttpHeaders responseHeaders = new HttpHeaders();
-		responseHeaders.setLocation(location);
 		if (query.validateUser(username, password))
 		{
-			if (query.createAdmin(username, id, adminpassword))
+			int result = query.createAdmin(username,  id,  adminpassword);
+			if (result == 0)
 			{
-				responseHeaders.set("Success", "200"); // Success
+				log.info(username + " created a new admin account for RSO #" + id + " with password " + adminpassword);
+				return ResponseEntity.ok("Admin Account Created");
+			} else if (result == 3)
+			{
+				log.info(username + " tried to created a new admin account for RSO #" + id + " but the RSO was not found");
+				return ResponseEntity.status(HttpStatus.NOT_FOUND).body("RSO #" + id + " not found.");
+			} else if (result == 2)
+			{
+				log.info(username + " tried to created a new admin account for RSO #" + id + " but the RSO did not have enough students");
+				return ResponseEntity.status(HttpStatus.CONFLICT).body("RSO #" + id + " did not have enough users");
 			} else
 			{
-				responseHeaders.set("RSO not Found", "404"); // RSO Not Fount
+				log.info(username + " tried to created a new admin account for RSO #" + id + " but the RSO already had an admin");
+				return ResponseEntity.status(HttpStatus.CONFLICT).body("RSO #" + id + " has an admin already");
 			}
 		} else
 		{
-			responseHeaders.set("Not Authorized", "401"); // Not Authorized
+			log.info("Unauthorized access to create admin with username " + username + " with password " + password);
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Unauthorized Access");
 		}
-		return new ResponseEntity<String>("User Added", responseHeaders, HttpStatus.CREATED);
 	}
 	
 	@RequestMapping(value = "/adminlogin", method = RequestMethod.GET)
-	public ResponseEntity<?> loginAdmin(@Param("user") String username, @Param("password") String password) throws URISyntaxException
+	public ResponseEntity<?> loginAdmin(@Param("username") String username, @Param("password") String password) throws URISyntaxException
 	{
-		String uribase = "http://localhost:8080/termproject/userlogin";
-		URI location = new URI(uribase);
-		HttpHeaders responseHeaders = new HttpHeaders();
-		responseHeaders.setLocation(location);
 		if (query.validateAdmin(username, password))
 		{
-			responseHeaders.set("Success", "200"); // Success
+			log.info(username + " logged into admin account");
+			return ResponseEntity.ok("Admin Logged In.");
 		} else
 		{
-			responseHeaders.set("Not Authorized", "401"); // Not Authorized
+			log.info("Unauthorized access to admin login with username " + username + " with password " + password);
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Unauthorized Access");
 		}
-		return new ResponseEntity<String>("User Added", responseHeaders, HttpStatus.CREATED);
 	}
 	
 	@RequestMapping(value = "/createevent", method = RequestMethod.GET)
-	public ResponseEntity<?> createEvent(@Param("user") String username, 
+	public ResponseEntity<?> createEvent(@Param("username") String username, 
 										 @Param("password") String password,
 										 @Param("type") String type,
 										 @Param("time") Long time,
@@ -310,128 +335,128 @@ public class TermRestController
 										 @Param("desc") String desc,
 										 @Param("name") String name) throws URISyntaxException
 	{
-		String uribase = "http://localhost:8080/termproject/userlogin";
-		URI location1 = new URI(uribase);
-		HttpHeaders responseHeaders = new HttpHeaders();
-		responseHeaders.setLocation(location1);
 		if (query.validateAdmin(username, password))
 		{
 			if (query.createEvent(username, type, time, location, name, desc))
 			{
-				responseHeaders.set("Success", "200"); // 401 unauthorized/ 409 conflict
+				log.info(username + " created an event of type " + type);
+				return ResponseEntity.ok("Event created.");
 			} else
 			{
-				responseHeaders.set("There was a Conflict with another Event", "409"); //Conflict with another Event
+				log.info(username + " tried to create an event but it conflicted with another event");
+				return ResponseEntity.status(HttpStatus.CONFLICT).body("There was a conflict with another event.");
 			}
 		} else
 		{
-			responseHeaders.set("Not Authorized", "401"); //Not Authorized
+			log.info("Unauthorized access to create event with username " + username + " with password " + password);
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Unauthorized Access");
 		}
-		return new ResponseEntity<String>("User Added", responseHeaders, HttpStatus.CREATED);
 	}
 	
 	@RequestMapping(value = "/closerso", method = RequestMethod.GET)
-	public ResponseEntity<?> closeRSO(@Param("user") String username, @Param("password") String password) throws URISyntaxException
+	public ResponseEntity<?> closeRSO(@Param("username") String username, @Param("password") String password) throws URISyntaxException
 	{
-		String uribase = "http://localhost:8080/termproject/userlogin";
-		URI location = new URI(uribase);
-		HttpHeaders responseHeaders = new HttpHeaders();
-		responseHeaders.setLocation(location);
 		if (query.validateAdmin(username, password))
 		{
 			if (query.deleteAdmin(username, password))
 			{
-				responseHeaders.set("Success", "200"); // Success
+				log.info(username + " closed his RSO and deleted his account");
+				return ResponseEntity.ok("RSO Closed and admin account deleted");
 			} else
 			{
-				responseHeaders.set("Admin not Found", "404"); // Not Found
+				log.info(username + " attempted to close his RSO account, but it was not found?");
+				return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Could not find your account, did it ever really exist?");
 			}
 		} else
 		{
-			responseHeaders.set("Not Authorized", "401"); // Not Authorized
+			log.info("Unauthorized access to close RSO with username " + username + " with password " + password);
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Unauthorized Access");
 		}
-		return new ResponseEntity<String>("User Added", responseHeaders, HttpStatus.CREATED);
 	}
 	
 	@RequestMapping(value = "/superlogin", method = RequestMethod.GET)
 	public ResponseEntity<?> superLogin(@Param("username") String username, @Param("password") String password) throws URISyntaxException
 	{
-		log.info("SuperLogin request User: " + username + " Password: " + password);
-		String uribase = "http://localhost:8080/termproject/superlogin";
-		URI location = new URI(uribase);
-		HttpHeaders responseHeaders = new HttpHeaders();
-		responseHeaders.setLocation(location);
-		ResponseEntity<String> response;
 		if (query.validateSuperAdmin(username, password))
 		{
-			responseHeaders.set("Success", "200"); // Success
-			response = new ResponseEntity<String>("Logged in", responseHeaders, HttpStatus.CREATED);
+			log.info(username + " logged into super admin account.");
+			return ResponseEntity.ok("Super Admin Logged In.");
 		} else
 		{
-			responseHeaders.set("Not Authorized", "401"); // Not Authorized
-			response = new ResponseEntity<String>("Not Authorized", responseHeaders, HttpStatus.CREATED);
+			log.info("Unauthorized access to super admin login with username " + username + " with password " + password);
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Unauthorized Access");
 		}
-		return response;
 	}
 	
 	@RequestMapping(value = "/createpublic", method = RequestMethod.GET)
-	public ResponseEntity<?> createPublic(@Param("user") String username, 
+	public ResponseEntity<?> createPublic(@Param("username") String username, 
 										  @Param("password") String password,
 										  @Param("time") Long time,
 										  @Param("location") String location,
 										  @Param("desc") String desc,
 										  @Param("name") String name) throws URISyntaxException
 	{
-		String uribase = "http://localhost:8080/termproject/userlogin";
-		URI location1 = new URI(uribase);
-		HttpHeaders responseHeaders = new HttpHeaders();
-		responseHeaders.setLocation(location1);
 		if (query.validateSuperAdmin(username, password))
 		{
 			if (query.createPublicEvent(username, time, location, name, desc))
 			{
-				responseHeaders.set("Success", "200"); // 401 unauthorized/ 409 conflict
+				log.info(username + " created a public event");
+				return ResponseEntity.ok("Event created.");
 			} else
 			{
-				responseHeaders.set("There was a Conflict with another Event", "409"); //Conflict with another Event
+				log.info(username + " tried to create a public event but it conflicted with another event");
+				return ResponseEntity.status(HttpStatus.CONFLICT).body("There was a conflict with another event.");
 			}
 		} else
 		{
-			responseHeaders.set("Not Authorized", "401"); //Not Authorized
+			log.info("Unauthorized access to create public event with username " + username + " with password " + password);
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Unauthorized Access");
 		}
-		return new ResponseEntity<String>("User Added", responseHeaders, HttpStatus.CREATED);
 	}
 	
 	@RequestMapping(value = "/approve", method = RequestMethod.GET)
-	public ResponseEntity<?> approve(@Param("user") String username, 
+	public ResponseEntity<?> approve(@Param("username") String username, 
 			  						 @Param("password") String password,
 			  						 @Param("event") Long id,
 			  						 @Param("approval") boolean approve) throws URISyntaxException
 	{
-		String uribase = "http://localhost:8080/termproject/userlogin";
-		URI location1 = new URI(uribase);
-		HttpHeaders responseHeaders = new HttpHeaders();
-		responseHeaders.setLocation(location1);
 		if (query.validateSuperAdmin(username, password))
 		{
 			if (query.approved(id, approve))
 			{
-				responseHeaders.set("Success", "200"); // Success
+				log.info(username + " approved private event #" + id);
+				return ResponseEntity.ok("Event created.");
 			} else
 			{
-				responseHeaders.set("Could not find event to approve", "404"); // Event not found
+				log.info(username + " tried to approve private event #" + id + " but it could not be found");
+				return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Could not find event #" + id +".");
 			}
 		} else
 		{
-			responseHeaders.set("Not Authorized", "401"); // Not Authorized
+			log.info("Unauthorized access to approve private event with username " + username + " with password " + password);
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Unauthorized Access");
 		}
-		return new ResponseEntity<String>("User Added", responseHeaders, HttpStatus.CREATED);
 	}
 	
 	@RequestMapping(value = "/unapproved", method = RequestMethod.GET)
-	public List<Event> unapproved(@Param("user") String username, @Param("password") String password)
+	public ResponseEntity<?> unapproved(@Param("username") String username, @Param("password") String password)
 	{
-		return query.getUnapproved(username, password);
+		if (query.validateSuperAdmin(username, password))
+		{
+			log.info(username + " viewed their private event list");
+			return ResponseEntity.ok(query.getUnapproved(username, password));
+		} else
+		{
+			log.info("Unauthorized access to private event list by username:" + username + " with password: " + password);
+			List<Event> response = new LinkedList<>();
+			response.add(new Event(-1L,
+								   "Forbidden",
+								   "You are not authorized to view this page", 
+								   "http://localhost:8080/termproject/privateeventlist", 
+								   "error", 
+								   0L));
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+		}
 	}
 	
 }

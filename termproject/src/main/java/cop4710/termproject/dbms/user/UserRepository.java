@@ -10,6 +10,6 @@ public interface UserRepository extends JpaRepository<User, Long>
 {
 	@Query("Select u from user u Where u.name = :username")
 	public Optional<User> findUserByName(@Param("username") String username);
-	@Query("Select Count (u.id) from user u Join rso r Where r.name = :name")
+	@Query("Select Count (u.id) from user u Join u.rsos r Where r.name = :name")
 	public long countUsersInRSO(@Param("name") String name);
 }
