@@ -39,7 +39,6 @@ public class Event
 	@OneToMany(fetch = FetchType.LAZY,
             cascade =  CascadeType.ALL,
             orphanRemoval = true)
-	@JoinColumn(name = "cid")
 	private Set<Comment> comment = new HashSet<>();
 	
 	public Event() {}
