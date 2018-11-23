@@ -12,7 +12,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -35,8 +35,9 @@ public class RSO
 				   university*/;
 	private boolean active = false;
 	
-	@ManyToOne
-    @JoinColumn(name = "eid", nullable = true)
+	@OneToMany(fetch = FetchType.LAZY,
+		    cascade =  CascadeType.ALL,
+		    orphanRemoval = true)
 	private Set<RSOEvent> event = new HashSet<>();
 	
 	@OneToOne

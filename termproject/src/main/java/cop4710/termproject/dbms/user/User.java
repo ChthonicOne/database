@@ -41,7 +41,6 @@ public class User
 	@OneToMany(fetch = FetchType.LAZY,
             cascade =  CascadeType.ALL,
             orphanRemoval = true)
-	@JoinColumn(name = "cid")
 	private Set<Comment> comment = new HashSet<>();
 	
 	@ManyToMany(fetch = FetchType.LAZY,

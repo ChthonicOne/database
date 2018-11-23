@@ -11,7 +11,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
@@ -30,8 +30,9 @@ public class Admin
 	private String name,
 				   passwd;
 	
-	@ManyToOne
-    @JoinColumn(name = "eid", nullable = true)
+	@OneToMany(fetch = FetchType.LAZY,
+		    cascade =  CascadeType.ALL,
+		    orphanRemoval = true)
 	private Set<PrivateEvent> event = new HashSet<>();
 	
 	@OneToOne(fetch = FetchType.LAZY,

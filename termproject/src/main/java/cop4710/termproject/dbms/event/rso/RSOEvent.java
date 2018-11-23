@@ -2,11 +2,9 @@ package cop4710.termproject.dbms.event.rso;
 
 import java.util.Calendar;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
-import javax.persistence.OneToMany;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
@@ -19,10 +17,8 @@ import cop4710.termproject.dbms.rso.RSO;
 	   @UniqueConstraint(columnNames={"time", "location"}))
 public class RSOEvent extends Event 
 {
-	@OneToMany(fetch = FetchType.LAZY,
-            cascade =  CascadeType.ALL,
-            orphanRemoval = true)
-	@JoinColumn(name = "rid", nullable = false)
+	@ManyToOne
+    @JoinColumn(name = "rid", nullable = false)
 	private RSO rso;
 	
 	public RSOEvent() {}
