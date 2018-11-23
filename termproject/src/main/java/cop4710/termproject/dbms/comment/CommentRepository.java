@@ -8,6 +8,6 @@ import org.springframework.data.repository.query.Param;
 
 public interface CommentRepository extends JpaRepository<Comment, Long>
 {
-	@Query("Select c from comment c Join c.event e Join c.user u Where e.id = :id")
+	@Query("Select c from comment c Join c.event Join c.user Where c.event.id = :id")
 	public List<Comment> findCommentsByEventId(@Param("id") Long id);
 }
