@@ -3,15 +3,13 @@ package cop4710.termproject.dbms.superadmin;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.OneToMany;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import cop4710.termproject.dbms.event.pub.PublicEvent;
@@ -27,10 +25,8 @@ public class SuperAdmin
 	private String name,
 				   password;
 	
-	@OneToMany(fetch = FetchType.LAZY,
-            cascade =  CascadeType.ALL,
-            orphanRemoval = true)
-	@JoinColumn(name = "eid")
+	@ManyToOne
+    @JoinColumn(name = "eid", nullable = true)
 	private Set<PublicEvent> event = new HashSet<>();
 	
 	public SuperAdmin() {}

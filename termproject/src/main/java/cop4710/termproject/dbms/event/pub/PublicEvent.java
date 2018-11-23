@@ -2,9 +2,11 @@ package cop4710.termproject.dbms.event.pub;
 
 import java.util.Calendar;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
@@ -17,8 +19,10 @@ import cop4710.termproject.dbms.superadmin.SuperAdmin;
 	   @UniqueConstraint(columnNames={"time", "location"}))
 public class PublicEvent extends Event
 {
-	@ManyToOne
-    @JoinColumn(name = "said", nullable = false)
+	@OneToMany(fetch = FetchType.LAZY,
+            cascade =  CascadeType.ALL,
+            orphanRemoval = true)
+	@JoinColumn(name = "said", nullable = false)
 	private SuperAdmin admin;
 	
 	public PublicEvent(){}
