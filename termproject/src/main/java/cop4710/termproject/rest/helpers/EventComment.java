@@ -16,35 +16,53 @@ public class EventComment
 		this.time = time;
 	}
 
-	public String getText() {
+	public Long getId()
+	{
+		return id;
+	}
+
+	public void setId(Long id) 
+	{
+		this.id = id;
+	}
+
+	public String getText()
+	{
 		return text;
 	}
 
-	public void setText(String text) {
+	public void setText(String text)
+	{
 		this.text = text;
 	}
 
-	public String getUser() {
+	public String getUser()
+	{
 		return user;
 	}
 
-	public void setUser(String user) {
+	public void setUser(String user)
+	{
 		this.user = user;
 	}
 
-	public Double getRating() {
+	public Double getRating()
+	{
 		return rating;
 	}
 
-	public void setRating(Double rating) {
+	public void setRating(Double rating)
+	{
 		this.rating = rating;
 	}
 
-	public Long getTime() {
+	public Long getTime()
+	{
 		return time;
 	}
 
-	public void setTime(Long time) {
+	public void setTime(Long time) 
+	{
 		this.time = time;
 	}
 }
