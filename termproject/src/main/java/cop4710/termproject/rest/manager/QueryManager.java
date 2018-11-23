@@ -7,6 +7,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -32,6 +34,9 @@ import cop4710.termproject.rest.helpers.RSO;
 @Service
 public class QueryManager 
 {
+	
+	private static final Logger log = LoggerFactory.getLogger(QueryManager.class);
+	
 	@Autowired
 	private AdminService admin;
 	@Autowired
@@ -201,6 +206,7 @@ public class QueryManager
 
 	public boolean makeComment(String username, Long id, String text, Double rating)
 	{
+		log.info((rsoEvent == null) ? "rsoEvent is null" : "rsoEvent is not null");
 		Optional<RSOEvent> event1 = rsoEvent.find(id);
 		Optional<PrivateEvent> event2 = privateEvent.find(id);
 		Optional<PublicEvent> event3 = publicEvent.find(id);
@@ -388,5 +394,39 @@ public class QueryManager
 		{
 			return Collections.emptyList();
 		}
+	}
+
+	public void test() 
+	{
+		log.info((comment == null) ? "comment is null" : "comment is not null");
+		Optional<RSOEvent> event1 = rsoEvent.find(1L);
+		Optional<PrivateEvent> event2 = privateEvent.find(1L);
+		Optional<PublicEvent> event3 = publicEvent.find(1L);
+		cop4710.termproject.dbms.event.Event event;
+		
+		if(event1.isPresent())
+		{
+			event = event1.get();
+		} else if (event2.isPresent())
+		{
+			event = event2.get();
+		} else if (event3.isPresent())
+		{
+			event = event3.get();
+		} else
+		{
+			log.info("Event not found");
+			return;
+		}
+		Calendar now = Calendar.getInstance();
+		Optional<cop4710.termproject.dbms.user.User> owner = user.find("chthon");
+		if (!owner.isPresent())
+		{
+			log.info("user not found");
+			return;
+		}
+		Comment c = new Comment("Foo", 5.0, now.getTimeInMillis(), owner.get(), event);
+		log.info("Adding: " + c.toString());
+		comment.insert(c);
 	}
 }

@@ -30,6 +30,12 @@ public class TermRestController
 	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory.getLogger(TermRestController.class);
 	
+	/*@RequestMapping(value = "/test", method = RequestMethod.GET)
+	public void test()
+	{
+		query.test();
+	}*/
+	
 	@RequestMapping(value = "/publiceventlist", method = RequestMethod.GET)
 	public ResponseEntity<?> publicEventList()
 	{
@@ -236,6 +242,7 @@ public class TermRestController
 										 @Param("text") String text,
 										 @Param("rating") Double rating) throws URISyntaxException
 	{
+		log.info("username: " + username + " password:" + password + " id: " + id + " text: " + text + " rating: " + rating);
 		if (query.validateUser(username, password))
 		{
 			if (query.makeComment(username, id, text, rating))
