@@ -25,6 +25,7 @@ public class RSOService
 	public long insert(RSO rso)
 	{
 		repository.save(rso);
+		repository.flush();
 		return rso.getId();
 	}
 	

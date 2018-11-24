@@ -25,6 +25,7 @@ public class CommentService
 	public long insert(Comment comment)
 	{
 		repository.save(comment);
+		repository.flush();
 		return comment.getId();
 	}
 	

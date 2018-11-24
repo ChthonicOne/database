@@ -25,6 +25,7 @@ public class PrivateEventService
 	public long insert(PrivateEvent pe)
 	{
 		repository.save(pe);
+		repository.flush();
 		return pe.getId();
 	}
 	

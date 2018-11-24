@@ -25,6 +25,7 @@ public class RSOEventService
 	public long insert(RSOEvent re)
 	{
 		repository.save(re);
+		repository.flush();
 		return re.getId();
 	}
 	

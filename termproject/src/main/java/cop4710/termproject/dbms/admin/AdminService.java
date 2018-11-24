@@ -25,6 +25,7 @@ public class AdminService
 	public long insert(Admin admin)
 	{
 		repository.save(admin);
+		repository.flush();
 		return admin.getId();
 	}
 	

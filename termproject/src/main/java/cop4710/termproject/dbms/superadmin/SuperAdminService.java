@@ -25,6 +25,7 @@ public class SuperAdminService
 	public long insert(SuperAdmin sa)
 	{
 		repository.save(sa);
+		repository.flush();
 		return sa.getId();
 	}
 	

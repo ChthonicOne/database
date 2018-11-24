@@ -25,6 +25,7 @@ public class PublicEventService
 	public long insert(PublicEvent pe)
 	{
 		repository.save(pe);
+		repository.flush();
 		return pe.getId();
 	}
 	

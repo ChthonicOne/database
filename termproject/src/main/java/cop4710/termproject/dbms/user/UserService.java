@@ -27,6 +27,7 @@ public class UserService
 	public long insert(User user)
 	{
 		repository.save(user);
+		repository.flush();
 		return user.getId();
 	}
 	
