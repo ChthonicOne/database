@@ -436,6 +436,7 @@ public class TermRestController
 			  						 @Param("event") Long id,
 			  						 @Param("approval") boolean approve) throws URISyntaxException
 	{
+		log.info("Username: " + username + " password: " + password + " id: " + id + " approval: " + approve);
 		if (query.validateSuperAdmin(username, password))
 		{
 			if (query.approved(id, approve))
