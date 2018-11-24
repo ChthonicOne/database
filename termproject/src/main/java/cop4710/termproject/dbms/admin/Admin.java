@@ -32,7 +32,7 @@ public class Admin
 	
 	@OneToMany(fetch = FetchType.LAZY,
 		    cascade =  CascadeType.ALL,
-		    orphanRemoval = true)
+		    orphanRemoval = false)
 	private Set<PrivateEvent> event = new HashSet<>();
 	
 	@OneToOne(fetch = FetchType.LAZY,
