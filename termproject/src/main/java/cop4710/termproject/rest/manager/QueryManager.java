@@ -116,7 +116,7 @@ public class QueryManager
 			
 			for (cop4710.termproject.dbms.rso.RSO result : results)
 			{
-				values.add(new RSO(result.getId(), result.getAdmin().getName(), result.getName(), result.isActive()));
+				values.add(new RSO(result.getId(), (result.getAdmin() == null) ? null : result.getAdmin().getName(), result.getName(), result.isActive()));
 			}
 			return values;
 			
