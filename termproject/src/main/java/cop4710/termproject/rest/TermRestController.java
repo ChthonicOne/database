@@ -182,20 +182,29 @@ public class TermRestController
 									     @Param("rso") Long id,
 									     @Param("rsopassword") String rsopassword) throws URISyntaxException
 	{
-		if(query.validateUser(username, password) && query.RSOActivate(id, rsopassword))
+		if(!query.validateUser(username, password))
 		{
-			log.info(username + " activated RSO #" + id);
-			return ResponseEntity.ok("RSO Created");
+			log.info("Unauthorized access to activate RSO #" + id + " by username " + username + " with password " + password);
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Unauthorized Access");
 		} else
 		{
-			if (query.validateUser(username, password))
+			int result = query.RSOActivate(id, rsopassword);
+			if (result == 0)
+			{
+				log.info(username + " activated RSO #" + id);
+				return ResponseEntity.ok("RSO Created");
+			}else if(result == 3)
 			{
 				log.info("Unauthorized access to activate RSO #" + id + " by username " + username + " with password " + password);
 				return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Unauthorized Access");
-			} else
+			} else if(result == 2) 
 			{
 				log.info(username + " tried to activate RSO #" + id + " but did not have enough members");
 				return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Not Enough Members");
+			} else
+			{
+				log.info(username + " tried to activate RSO # " + id + " but RSO already active!");
+				return ResponseEntity.status(HttpStatus.CONFLICT).body("RSO is already active!");
 			}
 		}
 	}

@@ -166,21 +166,25 @@ public class QueryManager
 		}
 	}
 
-	public boolean RSOActivate(Long id, String rsopassword) 
+	public int RSOActivate(Long id, String rsopassword) 
 	{
 		Optional<cop4710.termproject.dbms.rso.RSO> result = rso.find(id);
 		if (result.isPresent() && result.get().getPasswd().equals(rsopassword))
 		{
-			if (user.countUsersInRSO(result.get().getName()) > 4)
+			if (result.get().isActive())
 			{
-				return true;
+				log.info("RSO Already active!");
+				return 1;
+			} else if (user.countUsersInRSO(result.get().getName()) > 4)
+			{
+				return 0;
 			} else
 			{
-				return false;
+				return 2;
 			}
 		}else
 		{
-			return false;
+			return 3;
 		}
 	}
 
