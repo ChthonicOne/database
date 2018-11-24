@@ -9,7 +9,7 @@ import org.springframework.data.repository.query.Param;
 
 public interface RSORepository extends JpaRepository<RSO, Long> 
 {
-	@Query("Select r From rso r Join user u Join r.admin a Where u.name = :username")
+	@Query("Select r From rso r Join r.users Join r.admin a Where r.users.name = :username")
 	List<RSO> findRSOByUsername(@Param("username") String username);
 	@Query("Select r From rso r Where r.name = :name")
 	Optional<RSO> findRSOByName(@Param("name") String name);
