@@ -79,7 +79,10 @@ public class QueryManager
 		{
 			for (PrivateEvent event : pevents)
 			{
-				results.add(new Event(event.getId(), event.getName(), event.getDesc(), event.getLocation(), "private", event.getTime()));
+				if (event.isApproved())
+				{
+					results.add(new Event(event.getId(), event.getName(), event.getDesc(), event.getLocation(), "private", event.getTime()));
+				}
 			}
 		}
 		if (!revents.isEmpty())
